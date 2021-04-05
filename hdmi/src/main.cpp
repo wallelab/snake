@@ -12,6 +12,10 @@ extern int HdmiInit();
 extern int HdmiCapture(int name, int num);
 extern int HdmiSave();
 
+extern int SerialInit();
+extern void SerialRead(int name);
+extern void SerialClose();
+
 
 //#define PRIORITY 1
 
@@ -31,6 +35,7 @@ void signal_handler(int signum)
 int main(int argc, char *argv[])
 {
     if (HdmiInit()) return -1;
+    if (SerialInit()) return -1;
 
     struct sigaction sa;
     struct itimerval tv;
@@ -64,10 +69,13 @@ int main(int argc, char *argv[])
         if (user_alarms != sig_alarms) {
             user_alarms = sig_alarms;
 
+            SerialRead(user_alarms);
             if (HdmiCapture(user_alarms, count)) break;
+
             count++;
             printf(".");
             fflush(stdout);
+
         }
 
         pause();
@@ -76,4 +84,7 @@ int main(int argc, char *argv[])
     printf("\n");
     HdmiSave();
     printf("\n");
+
+    SerialClose();
+
 }

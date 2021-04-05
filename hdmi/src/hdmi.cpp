@@ -3,21 +3,27 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#if 0
+#include <unistd.h>
+
+#if 1
     #define MAX_DEEP 3600
 #else
     #define MAX_DEEP 100
 #endif
 
-#define CUT_WIDTH 1530
+#define CUT_WIDTH 1540
 #define CUT_HEIGHT 890
 
-cv::VideoCapture cap(1);
+
+extern int ms_key;
+extern int ms_posx, ms_posy;
+
+cv::VideoCapture cap(0);
 cv::Mat frame, grayImage, cutImage;
 
 typedef struct {
     int name;
-    int keyst;
+    int key;
     int posx;
     int posy;
     cv::Mat map;
@@ -52,10 +58,12 @@ int HdmiCapture(int name, int num)
 
     if (num < MAX_DEEP) {
         m_hdmi[num].name = name;
+        m_hdmi[num].key = ms_key;
+        m_hdmi[num].posx = ms_posx;
+        m_hdmi[num].posy = ms_posy;
         cutImage.copyTo(m_hdmi[num].map);
         return 0;
     } else return 1;
-
 }
 
 void HdmiSave()
@@ -63,8 +71,19 @@ void HdmiSave()
     char szname[80];
 
     for (int i=0; i<MAX_DEEP; i++) {
-        sprintf(szname, "./pics/hdmi%04i.png", m_hdmi[i].name);
+        sprintf(szname, "./games/hdmi%04i.png", m_hdmi[i].name);
         cv::imwrite(szname, m_hdmi[i].map);
+    }
+
+    FILE *file = fopen("./games/mouse.dat", "w");
+    if (file != NULL) {
+        for (int i=0; i<MAX_DEEP; i++) {
+            fwrite(&m_hdmi[i].name, 1, 2, file);
+            fwrite(&m_hdmi[i].key, 1, 2, file);
+            fwrite(&m_hdmi[i].posx, 1, 2, file);
+            fwrite(&m_hdmi[i].posy, 1, 2, file);
+        }
+        fclose(file);
     }
 }
 
