@@ -71,8 +71,10 @@ void HdmiSave()
     char szname[80];
 
     for (int i=0; i<MAX_DEEP; i++) {
-        sprintf(szname, "./games/hdmi%04i.png", m_hdmi[i].name);
+        sprintf(szname, "./games/ss%04i.png", m_hdmi[i].name);
         cv::imwrite(szname, m_hdmi[i].map);
+        printf(".");
+        fflush(stdout);
     }
 
     FILE *file = fopen("./games/mouse.dat", "w");
