@@ -17,11 +17,12 @@ TCHAR szWindowClass[MAX_LOADSTRING];			// 主窗口类名
 HWND g_hWnd = NULL;
 HHOOK hook,hook2;
 LRESULT CALLBACK kbdProc(int code, WPARAM wParam, LPARAM lParam);
-HANDLE m_hComm=INVALID_HANDLE_VALUE;
 POINT mspt = {0,0};
 int mskey = 0;
-void OpenPort();
-void ClosePort();
+int count = 0;
+extern void OpenPort();
+extern void ClosePort();
+extern void SerialSend(int key, int posx, int posy);
 
 // 此代码模块中包含的函数的前向声明:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -128,7 +129,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 将实例句柄存储在全局变量中
 
    hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+      CW_USEDEFAULT, 0, 320, 200, NULL, NULL, hInstance, NULL);
 
    if (!hWnd)
    {
@@ -160,7 +161,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	char sz[64];
 	WCHAR wsz[64];
-	DWORD wlen;
 	PMSLLHOOKSTRUCT mouse = (PMSLLHOOKSTRUCT)lParam;
 	g_hWnd = hWnd;
 
@@ -195,12 +195,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_TIMER:
 		if (wParam == 0x555) {
-			sprintf_s(sz, "%i,%i,%i\n", mskey, mspt.x, mspt.y);
-			WriteFile(m_hComm, sz, strlen(sz), &wlen, NULL);
+			SerialSend(mskey, mspt.x, mspt.y);
+			count++;
+			count&=0xff;
+			sprintf_s(sz, "%i,%i,%i\n", count, mspt.x, mspt.y);
+//			sprintf_s(sz, "%i,%i,%i\n", mskey, mspt.x, mspt.y);
+
 			hdc = GetDC(hWnd);
 			GetClientRect(hWnd, &rect);
 			MultiByteToWideChar(CP_ACP, 0, sz, 64, wsz, 64);
-			DrawText(hdc,wsz,strlen(sz)+1,&rect,DT_SINGLELINE);
+			DrawText(hdc,wsz,strlen(sz),&rect,DT_SINGLELINE);
 			ReleaseDC(hWnd,hdc);
 		}
 		break;
@@ -241,12 +245,11 @@ LRESULT CALLBACK kbdProc(int code, WPARAM wParam, LPARAM lParam)
 	//	return 1;
 	//}
 
-		PKBDLLHOOKSTRUCT param = (PKBDLLHOOKSTRUCT)lParam;
-	
-		if (param->vkCode == VK_ESCAPE)
-		{
-			PostQuitMessage(0);
-		}
+//		PKBDLLHOOKSTRUCT param = (PKBDLLHOOKSTRUCT)lParam;
+//		if (param->vkCode == VK_ESCAPE)
+//		{
+//			PostQuitMessage(0);
+//		}
 
 		if (g_hWnd != NULL) {
 			switch (wParam)
@@ -268,45 +271,3 @@ LRESULT CALLBACK kbdProc(int code, WPARAM wParam, LPARAM lParam)
 	return CallNextHookEx(hook, code, wParam, lParam);
 }
 
-void OpenPort()
-{
-	m_hComm=CreateFile(_T("COM3:"),GENERIC_READ|GENERIC_WRITE,0,0,
-		OPEN_EXISTING,0,0);
-
-	if (m_hComm == INVALID_HANDLE_VALUE) {
-			MessageBox(NULL, TEXT("Can not Open SER1 Port!"), TEXT("没找到"), 0);
-	}
-
-	DCB dcb;
-	GetCommState(m_hComm,&dcb);
-	dcb.BaudRate=CBR_115200;
-	dcb.ByteSize=8;
-	dcb.Parity=NOPARITY;
-	dcb.StopBits=TWOSTOPBITS;
-	dcb.fParity=FALSE;
-	dcb.fBinary=TRUE;
-	dcb.fDtrControl=0;
-	dcb.fRtsControl=0;
-	dcb.fOutX=0;
-	dcb.fInX=0;
-	dcb.fTXContinueOnXoff=0;
-
-	SetCommMask(m_hComm,EV_RXCHAR);			//Com Event: a char
-	SetupComm(m_hComm,1024,1024);			//Buffer
-	if (!SetCommState(m_hComm,&dcb))
-	{
-		MessageBox(NULL, TEXT("Can not Open SER1 Port!"), TEXT("DCB"), 0);
-		ClosePort();
-		return;
-	}
-}
-
-void ClosePort()
-{
-	//	Close SER1:
-	if (m_hComm!=INVALID_HANDLE_VALUE)
-	{
-		CloseHandle(m_hComm);
-		m_hComm=INVALID_HANDLE_VALUE;
-	}
-}
