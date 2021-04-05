@@ -3,12 +3,17 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+#if 0
+    #define MAX_DEEP 3600
+#else
+    #define MAX_DEEP 100
+#endif
 
-#define MAX_DEEP 3600
-#define CUT_WIDTH 1200
-#define CUT_HEIGHT 720
+#define CUT_WIDTH 1530
+#define CUT_HEIGHT 890
 
 cv::VideoCapture cap(1);
+cv::Mat frame, grayImage, cutImage;
 
 typedef struct {
     int name;
@@ -31,22 +36,23 @@ int HdmiInit()
     cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
     cap.set(CV_CAP_PROP_FPS, 60);
 
+    cap >> frame;
+    cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
+    cutImage = grayImage(cv::Rect(0,0,1530,890));
     return 0;
 }
 
 
 int HdmiCapture(int name, int num)
 {
-    cv::Mat frame, grayImage;
-
     cap >> frame;
 
-//    cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
-    frame.copyTo(grayImage);
+    cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
+//    frame.copyTo(grayImage);
 
     if (num < MAX_DEEP) {
         m_hdmi[num].name = name;
-        grayImage.copyTo(m_hdmi[num].map);
+        cutImage.copyTo(m_hdmi[num].map);
         return 0;
     } else return 1;
 
@@ -55,11 +61,9 @@ int HdmiCapture(int name, int num)
 void HdmiSave()
 {
     char szname[80];
-    cv::Mat image;
 
     for (int i=0; i<MAX_DEEP; i++) {
         sprintf(szname, "./pics/hdmi%04i.png", m_hdmi[i].name);
-        image = m_hdmi[i].map(cv::Rect(0,0,CUT_WIDTH, CUT_HEIGHT));
         cv::imwrite(szname, m_hdmi[i].map);
     }
 }
