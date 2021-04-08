@@ -1,8 +1,8 @@
 import tensorflow as tf
 
 
-C_WIDTH = 306
-C_HEIGHT = 178
+C_WIDTH = 153
+C_HEIGHT = 89
 C_ANGLE = 72
 C_LAYER = 5
 
@@ -34,7 +34,7 @@ class Network(object):
 			return tf.nn.conv2d(x, W, strides=[1,1,1,1], padding="SAME")
 
 		# initial conv layer is 5x5
-		W_conv_init = _weight_variable([8, 8, self.num_input_planes, self.k])
+		W_conv_init = _weight_variable([7, 7, self.num_input_planes, self.k])
 		h_conv_init = tf.nn.relu(_conv2d(self.x, W_conv_init))
 
 		# followed by a series of 3x3 conv layers
@@ -42,8 +42,8 @@ class Network(object):
 		h_conv_intermediate = []
 		_current_h_conv = h_conv_init
 		for i in range(self.num_int_conv_layers):
-			W_conv_intermediate.append(_weight_variable([4, 4, self.k, self.k]))
-			h_conv_intermediate.append(tf.nn.relu(_conv2d(_current_h_conv, W_conv_intermediate[-1])))
+			W_conv_intermediate.append(_weight_variable([5, 5, self.k, self.k]))
+			h_conv_intermediate.append(tf.nn.relu(_conv2d(_current_h_conv, W_conv_intermediate[-1]) + _current_h_conv))
 			_current_h_conv = h_conv_intermediate[-1]
 
 		W_conv_final = _weight_variable([1, 1, self.k, 1])
@@ -77,7 +77,9 @@ class Network(object):
 	def initialize_variables(self, save_file=None):
 		self.session.run(tf.global_variables_initializer())
 		if save_file is not None:
-			self.saver.restore(self.session, save_file)
+			checkpoint = tf.train.get_checkpoint_state(save_file)
+			if checkpoint and checkpoint.model_checkpoint_path:
+				tf.train.Saver().restore(self.session, checkpoint.model_checkpoint_path)
 
 	def get_global_step(self):
 		return self.session.run(self.global_step)
@@ -100,14 +102,9 @@ class Network(object):
 		#	self.training_summary_writer.add_summary(activation_summaries, global_step)
 		#	self.training_summary_writer.add_summary(accuracy_summaries, global_step)
 
-	def load_variables(self):
-		checkpoint = tf.train.get_checkpoint_state("saved_networks")
-		if checkpoint and checkpoint.model_checkpoint_path:
-			tf.train.saver().restore(self.session, checkpoint.model_checkpoint_path)
-
 	def save_variables(self, save_file, step = 1):
 		if save_file is not None:
 			print("Saving checkpoint to %s" % save_file)
-			tf.train.saver().save(self.session, save_file, step)
+			tf.train.Saver().save(self.session, save_file, step)
 
 

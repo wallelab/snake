@@ -32,9 +32,9 @@ int n_pic = 0;
 int ReadMouse()
 {
     int i;
-    FILE *file = fopen("./games/mouse.dat", "rb");
+    FILE *file = fopen("./game/mouse.dat", "rb");
     if (file == NULL) {
-        printf("Open file ./games/mouse.dat failure.\n");
+        printf("Open file ./game/mouse.dat failure.\n");
         return -1;
     }
 
@@ -55,7 +55,7 @@ void ReadPics()
     char szname[64];
 
     for (int i=0; i<n_pic; i++) {
-        sprintf(szname, "./games/ss%04i.png", m_pic[i].name);
+        sprintf(szname, "./game/ss%04i.png", m_pic[i].name);
         m_pic[i].map = cv::imread(szname);
         printf(".");
         fflush(stdout);
@@ -136,11 +136,17 @@ void SaveData()
     fclose(file);
 
     char szname[64];
-    cv::Mat uimg;
+    cv::Mat image, uimg, roi1, roi2;
 
     for (int i=0; i<n_pic; i++) {
         sprintf(szname, "./data/ss%04i.png", m_pic[i].name);
-        cv::resize(m_pic[i].map, uimg, cv::Size(MAX_WIDTH/5, MAX_HEIGHT/5));
+        roi1 = m_pic[i].map(cv::Rect(0,0,240,260));
+        roi1.setTo(cv::Scalar(0, 0, 0));
+        roi2 = m_pic[i].map(cv::Rect(1230,0,MAX_WIDTH-1230,390));
+        roi2.setTo(cv::Scalar(0, 0, 0));
+
+        cv::resize(m_pic[i].map, image, cv::Size(MAX_WIDTH/10, MAX_HEIGHT/10));
+        cv::threshold(image, uimg, 64, 255, 0);
         cv::imwrite(szname, uimg);
         printf(".");
         fflush(stdout);

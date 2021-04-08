@@ -2,9 +2,8 @@ import numpy as np
 import os
 import cv2
 import random
-
-C_WIDTH = 306
-C_HEIGHT = 178
+C_WIDTH = 153
+C_HEIGHT = 89
 C_ANGLE = 72
 C_LAYER = 5
 
