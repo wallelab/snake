@@ -7,7 +7,7 @@ C_HEIGHT = 89
 C_ANGLE = 72
 C_LAYER = 5
 
-work_dir = "/tftpboot/cv/data/"
+
 
 status = []
 labels = []
@@ -15,9 +15,8 @@ labels = []
 class Dataset(object):
 	def __init__(self):
 		self.length = 0
-		self.prepare()
 
-	def prepare(self):
+	def prepare(self, work_dir = "/tftpboot/cv/data/"):
 		with open(work_dir + "mouse.dat","rb") as file:
 			szdat = file.read()
 			mskey = []

@@ -140,13 +140,14 @@ void SaveData()
 
     for (int i=0; i<n_pic; i++) {
         sprintf(szname, "./data/ss%04i.png", m_pic[i].name);
-        roi1 = m_pic[i].map(cv::Rect(0,0,240,260));
+        cv::cvtColor(m_pic[i].map, image, CV_RGB2GRAY);
+        roi1 = image(cv::Rect(0,0,240,260));
         roi1.setTo(cv::Scalar(0, 0, 0));
-        roi2 = m_pic[i].map(cv::Rect(1230,0,MAX_WIDTH-1230,390));
+        roi2 = image(cv::Rect(1230,0,MAX_WIDTH-1230,390));
         roi2.setTo(cv::Scalar(0, 0, 0));
 
-        cv::resize(m_pic[i].map, image, cv::Size(MAX_WIDTH/10, MAX_HEIGHT/10));
-        cv::threshold(image, uimg, 64, 255, 0);
+        cv::resize(image, uimg, cv::Size(MAX_WIDTH/10, MAX_HEIGHT/10));
+        cv::threshold(uimg, uimg, 64, 255, 0);
         cv::imwrite(szname, uimg);
         printf(".");
         fflush(stdout);

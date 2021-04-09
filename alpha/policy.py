@@ -7,7 +7,7 @@ C_ANGLE = 72
 C_LAYER = 5
 
 class Network(object):
-	def __init__(self, num_int_conv_layers=12):
+	def __init__(self, num_int_conv_layers=8):
 		self.num_input_planes = C_LAYER
 		self.k = 32
 		self.num_int_conv_layers = num_int_conv_layers
@@ -43,7 +43,7 @@ class Network(object):
 		_current_h_conv = h_conv_init
 		for i in range(self.num_int_conv_layers):
 			W_conv_intermediate.append(_weight_variable([5, 5, self.k, self.k]))
-			h_conv_intermediate.append(tf.nn.relu(_conv2d(_current_h_conv, W_conv_intermediate[-1]) + _current_h_conv))
+			h_conv_intermediate.append(tf.nn.relu(_conv2d(_current_h_conv, W_conv_intermediate[-1]) + 0.5 * _current_h_conv))
 			_current_h_conv = h_conv_intermediate[-1]
 
 		W_conv_final = _weight_variable([1, 1, self.k, 1])
@@ -74,10 +74,10 @@ class Network(object):
 		#)
 		#saver = tf.train.Saver()
 
-	def initialize_variables(self, save_file=None):
+	def initialize_variables(self, save_path=None):
 		self.session.run(tf.global_variables_initializer())
-		if save_file is not None:
-			checkpoint = tf.train.get_checkpoint_state(save_file)
+		if save_path is not None:
+			checkpoint = tf.train.get_checkpoint_state(save_path)
 			if checkpoint and checkpoint.model_checkpoint_path:
 				tf.train.Saver().restore(self.session, checkpoint.model_checkpoint_path)
 

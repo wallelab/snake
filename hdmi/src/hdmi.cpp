@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #if 1
-    #define MAX_DEEP 3600
+    #define MAX_DEEP 2400
 #else
     #define MAX_DEEP 100
 #endif
@@ -43,7 +43,8 @@ int HdmiInit()
     cap.set(CV_CAP_PROP_FPS, 60);
 
     cap >> frame;
-    cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
+    //cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
+    frame.copyTo(grayImage);
     cutImage = grayImage(cv::Rect(0,0,1530,890));
     return 0;
 }
@@ -53,8 +54,8 @@ int HdmiCapture(int name, int num)
 {
     cap >> frame;
 
-    cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
-//    frame.copyTo(grayImage);
+//    cv::cvtColor(frame, grayImage, CV_RGB2GRAY);
+    frame.copyTo(grayImage);
 
     if (num < MAX_DEEP) {
         m_hdmi[num].name = name;
@@ -71,13 +72,13 @@ void HdmiSave()
     char szname[80];
 
     for (int i=0; i<MAX_DEEP; i++) {
-        sprintf(szname, "./games/ss%04i.png", m_hdmi[i].name);
+        sprintf(szname, "./game/ss%04i.png", m_hdmi[i].name);
         cv::imwrite(szname, m_hdmi[i].map);
         printf(".");
         fflush(stdout);
     }
 
-    FILE *file = fopen("./games/mouse.dat", "w");
+    FILE *file = fopen("./game/mouse.dat", "w");
     if (file != NULL) {
         for (int i=0; i<MAX_DEEP; i++) {
             fwrite(&m_hdmi[i].name, 1, 2, file);

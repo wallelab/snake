@@ -162,6 +162,7 @@ void SerialRead(int name)
 #ifdef DEBUG_RECV
                     printf("\tbuff(%i)-(%i,%i,%i)", i, pblock->key, pblock->posx, pblock->posy);
 #endif //DEBUG_RECV
+                    printf("^");
                     ms_key = pblock->key;
                     ms_posx = pblock->posx;
                     ms_posy = pblock->posy;
