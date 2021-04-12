@@ -26,7 +26,7 @@ def train(dset):
 
 	w1 = _weight_variable([10,7,3])
 
-	e = []
+	e = np.zeros([10],float)
 	for k in range(10):
 		c = []
 		for i in range(20):
@@ -37,7 +37,7 @@ def train(dset):
 		c2 = tf.nn.max_pool(c1, ksize = [1, 5, 3, 1], strides = [1, 5, 3, 1], padding = "SAME")
 		c3 = tf.reshape(c2,[16])
 		c4 = c3[6]
-		e.append(c4)
+		e[k] = c4
 	e1 = tf.reshape(e, [10])
 	e2 = tf.exp(e1)
 	cost = tf.reduce_mean(tf.square(input_y - e2))
