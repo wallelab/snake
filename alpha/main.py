@@ -2,7 +2,7 @@ from load_data import Dataset
 from policy import Network
 
 d = Dataset()
-d.prepare("/tftpboot/cv/data1/")
+d.prepare("/tftpboot/cv/data2/")
 
 n = Network()
 n.initialize_variables("./saved_network/")

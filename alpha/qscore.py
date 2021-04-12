@@ -9,16 +9,17 @@ cuty = 260
 
 
 work_dir = "/tftpboot/cv/game/"
-work_f1 = work_dir + "ss0040.png"
-work_f2 = work_dir + "ss0080.png"
-work_f3 = work_dir + "ss0272.png"
+work_f1 = work_dir + "ss0004.png"
+work_f2 = work_dir + "ss0089.png"
+work_f3 = work_dir + "ss0169.png"
 workfile = [work_f1, work_f2, work_f3]
 
 def adjust():
 	global cutx, cuty
 	image = cv2.imread(work_f3)
+	cv2.cvtColor(image, image, cv2.COLOR_BRG2GRAY)
 	while (True):
-		cutimg = image[0:cuty, 0:cutx, 0]
+		cutimg = image[0:cuty, 0:cutx]
 		cv2.imshow("image", cutimg)
 		c = cv2.waitKey()
 		if (c == 27):
@@ -38,7 +39,8 @@ def adjust():
 
 def histogram(file):
 	image = cv2.imread(file)
-	cutimg = image[0:cuty, cutx:-1, 0]
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	cutimg = image[0:cuty, cutx:-1]
 	histo = np.zeros(cuty)
 	for i in range(cuty):
 		histo[i] = np.sum(cutimg[i, :])
@@ -50,9 +52,9 @@ def stdhisto():
 		histo = histogram(file)
 		histos.append(histo)
 
-	#for d in histos:
-	#	plt.plot(d)
-	#	plt.show()
+	for d in histos:
+		plt.plot(d)
+		plt.show()
 
 curve1 = []
 curve2 = []
@@ -92,7 +94,8 @@ def distribute():
 
 
 if __name__ == '__main__':
-	adjust()
+	#adjust()
+	stdhisto()
 	#distribute()
 
 

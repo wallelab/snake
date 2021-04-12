@@ -53,10 +53,13 @@ int ReadMouse()
 void ReadPics()
 {
     char szname[64];
+    cv::Mat image, grayimage;
 
     for (int i=0; i<n_pic; i++) {
         sprintf(szname, "./game/ss%04i.png", m_pic[i].name);
-        m_pic[i].map = cv::imread(szname);
+        image = cv::imread(szname);
+        cv::cvtColor(image, grayimage, CV_RGB2GRAY);
+        cv::cvtColor(grayimage, m_pic[i].map, CV_GRAY2RGB);
         printf(".");
         fflush(stdout);
     }
@@ -140,15 +143,14 @@ void SaveData()
 
     for (int i=0; i<n_pic; i++) {
         sprintf(szname, "./data/ss%04i.png", m_pic[i].name);
-        cv::cvtColor(m_pic[i].map, image, CV_RGB2GRAY);
-        roi1 = image(cv::Rect(0,0,240,260));
+        roi1 = m_pic[i].map(cv::Rect(0,0,240,260));
         roi1.setTo(cv::Scalar(0, 0, 0));
-        roi2 = image(cv::Rect(1230,0,MAX_WIDTH-1230,390));
+        roi2 = m_pic[i].map(cv::Rect(1230,0,MAX_WIDTH-1230,390));
         roi2.setTo(cv::Scalar(0, 0, 0));
 
-        cv::resize(image, uimg, cv::Size(MAX_WIDTH/10, MAX_HEIGHT/10));
-        cv::threshold(uimg, uimg, 64, 255, 0);
-        cv::imwrite(szname, uimg);
+        cv::resize(m_pic[i].map, uimg, cv::Size(MAX_WIDTH/10, MAX_HEIGHT/10));
+        cv::threshold(uimg, image, 64, 255, 0);
+        cv::imwrite(szname, image);
         printf(".");
         fflush(stdout);
     }
@@ -163,21 +165,20 @@ int main()
 
     ReadPics();
 
-    cv::Mat image, img;
+    cv::Mat img;
     int seq = 0;
     int brun = 1;
     while (brun) {
         printf("org(%i,%i) => (%i,%i) - %i\n", m_pic[seq].posx, m_pic[seq].posy,
                m_pic[seq].newx, m_pic[seq].newy, m_pic[seq].angle*5);
-        m_pic[seq].map.copyTo(image);
-        img = image(cv::Rect(m_pic[seq].newx, m_pic[seq].newy, 20, 20));
+        img = m_pic[seq].map(cv::Rect(m_pic[seq].newx, m_pic[seq].newy, 20, 20));
         if (m_pic[seq].light) {
             img.setTo(cv::Scalar(0, 192, 0));
         } else {
             img.setTo(cv::Scalar(0, 0, 192));
         }
 
-        cv::imshow("mapedit", image);
+        cv::imshow("mapedit", m_pic[seq].map);
 
         int c = cv::waitKey();
         switch (c)
