@@ -69,32 +69,36 @@ def _weight_variable(shape):
 	return tf.Variable(initial)
 
 def train(dset):
-	inp_x = tf.placeholder(tf.float32, shape = [20, 12, 7, 3, 10])
-	inp_y = tf.placeholder(tf.float32, shape = [10])
+	inp_x = tf.placeholder(tf.float32, shape = [None, 20, 12, 7, 3, 10])
+	inp_y = tf.placeholder(tf.float32, shape = [None, 10])
 
 	w1 = _weight_variable([7, 3, 10])
-	w2 = _weight_variable([1, 16])
+	w2 = _weight_variable([160, 10])
 
 	h_c1 = tf.abs(inp_x - w1)
 
-	e1 = -tf.reduce_sum(h_c1, axis=[2,3])
-	e2 = tf.reshape(e1, [1, 20, 12, 10])
+	e1 = tf.reduce_sum(h_c1, axis=[3,4])
+	e2 = tf.reshape(-e1, [-1, 20, 12, 10])
 	e3 = tf.nn.max_pool(e2, ksize = [1, 5, 3, 1], strides = [1, 5, 3, 1], padding = "SAME")
-	e4 = tf.reshape(e3, [16,10])
-	e5 = tf.matmul(w2, e4)
+	e4 = tf.reshape(e3, [-1, 160])
+	e5 = tf.nn.relu(tf.matmul(tf.exp(e4), w2))
 
-	cost = tf.reduce_sum(tf.square(inp_y - e5))
+	cost = tf.reduce_sum(tf.square(inp_y - e5), axis = -1)
 
 	train_step = tf.train.AdamOptimizer(1e-6).minimize(cost)
+
+	(dat0, label0) = getdata(dset[0],0)
+	(dat1, label1) = getdata(dset[1],1)
+	datx = [dat0, dat1]
+	daty = [label0, label1]
 
 	with tf.Session() as sess:
 		sess.run(tf.global_variables_initializer())
 
 		for i in range(10):
-			(dat, label) = getdata(dset[i],i)
-			_, cost = sess.run([train_step, cost], feed_dict={inp_x:dat, inp_y:label})
+			_, cost = sess.run([train_step, cost], feed_dict={inp_x:datx, inp_y:daty})
 			print(cost)
-			#_ = sess.run(cost, feed_dict={inp_x:dat, inp_y:label})
+			#_ = sess.run(cost, feed_dict={inp_x:datx, inp_y:daty})
 			#print(_.shape)
 
 if __name__ == "__main__":
