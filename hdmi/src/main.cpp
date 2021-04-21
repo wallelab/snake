@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
     }
 
     tv.it_interval.tv_sec = 0;
-    tv.it_interval.tv_usec = 100000;
+    tv.it_interval.tv_usec = 20000;
     tv.it_value.tv_sec = 0;
-    tv.it_value.tv_usec = 100000;
+    tv.it_value.tv_usec = 20000;
     if (setitimer(ITIMER_REAL, &tv, NULL)) {
         fprintf(stderr, "Failed to start timer: %s\n", strerror(errno));
         return 1;

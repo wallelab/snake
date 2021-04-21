@@ -5,10 +5,10 @@
 
 #include <unistd.h>
 
-#if 1
+#if 0
     #define MAX_DEEP 2400
 #else
-    #define MAX_DEEP 100
+    #define MAX_DEEP 200
 #endif
 
 #define CUT_WIDTH 1540
@@ -40,7 +40,7 @@ int HdmiInit()
 
     cap.set(CV_CAP_PROP_FRAME_WIDTH, 1920);
     cap.set(CV_CAP_PROP_FRAME_HEIGHT, 1080);
-    cap.set(CV_CAP_PROP_FPS, 60);
+    cap.set(CV_CAP_PROP_FPS, 50);
 
     cap >> frame;
     //cv::cvtColor(frame, grayImage, CV_RGB2GRAY);

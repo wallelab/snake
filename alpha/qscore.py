@@ -2,24 +2,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-#cutx = 1230
-#cuty = 390
-cutx = 240
-cuty = 260
+cutx = 1230
+cuty = 355
+#cutx = 240
+#cuty = 260
 
 
 work_dir = "/tftpboot/cv/game/"
 work_f1 = work_dir + "ss0004.png"
 work_f2 = work_dir + "ss0089.png"
-work_f3 = work_dir + "ss0169.png"
+work_f3 = work_dir + "ss1554.png"
 workfile = [work_f1, work_f2, work_f3]
 
 def adjust():
 	global cutx, cuty
 	image = cv2.imread(work_f3)
-	cv2.cvtColor(image, image, cv2.COLOR_BRG2GRAY)
+	image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	while (True):
-		cutimg = image[0:cuty, 0:cutx]
+		cutimg = image[0:cuty, cutx:]
 		cv2.imshow("image", cutimg)
 		c = cv2.waitKey()
 		if (c == 27):
@@ -94,8 +94,8 @@ def distribute():
 
 
 if __name__ == '__main__':
-	#adjust()
-	stdhisto()
+	adjust()
+	#stdhisto()
 	#distribute()
 
 
